@@ -1,0 +1,192 @@
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="#EEEEEE"
+    android:layout_height="match_parent"
+    tools:context="com.dryan.weather.MainActivity$PlaceholderFragment">
+
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:background="#EEEEEE"
+    android:layout_height="match_parent"
+    tools:context="com.dryan.weather.MainActivity$PlaceholderFragment">
+
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:id="@+id/now"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_alignParentTop="true"
+        android:padding="6dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/card_bg2">
+        <TextView
+            android:id="@+id/temp"
+            android:text="-"
+            android:textSize="60sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/location"
+            android:text="-"
+            android:layout_alignParentLeft="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/powered"
+            android:text="Powered by forcast.io"
+            android:textSize="10sp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="100dp"
+            android:layout_marginTop="20dp"
+            android:layout_height="100dp"
+            android:layout_alignTop="@id/temp"
+            android:layout_marginLeft="40dp" />
+
+        <TextView
+            android:id="@+id/summary"
+            android:text="-"
+            android:textSize="22sp"
+            android:layout_marginRight="32dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/temp"
+            android:gravity="right"
+            android:maxLines="2"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/feels_like"
+            android:text="Feels like -"
+            android:textSize="16sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/colon_one"
+            android:text=" : "
+            android:textSize="16sp"
+            android:layout_below="@id/icon"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/precip_value"
+            android:text="-in"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/colon_one"
+            android:layout_toRightOf="@+id/colon_one" />
+
+        <TextView
+            android:id="@+id/colon_two"
+            android:text=" : "
+            android:textSize="16sp"
+            android:layout_below="@id/colon_one"
+            android:layout_marginTop="10dp"
+            android:layout_alignLeft="@id/colon_one"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/colon_three"
+            android:text=" : "
+            android:textSize="16sp"
+            android:layout_below="@id/colon_two"
+            android:layout_marginTop="10dp"
+            android:layout_alignLeft="@id/colon_two"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/humidity"
+            android:text="HUMIDTY "
+            android:textSize="16sp"
+            android:layout_alignBottom="@id/colon_two"
+            android:layout_toLeftOf="@id/colon_two"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/precip"
+            android:layout_alignBottom="@id/colon_one"
+            android:text="PRECIPITATION "
+            android:layout_toLeftOf="@id/colon_three"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/humidity_value"
+            android:text="-%"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/colon_two"
+            android:layout_toRightOf="@+id/colon_two" />
+
+        <TextView
+            android:id="@+id/wind"
+            android:text="WIND "
+            android:textSize="16sp"
+            android:layout_alignBottom="@id/colon_three"
+            android:layout_toLeftOf="@id/colon_three"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/wind_value"
+            android:text="-mpg"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/colon_three"
+            android:layout_toRightOf="@+id/colon_three" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/rain_group"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_below="@id/now"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/card_bg2">
+
+        <TextView
+            android:id="@+id/precip_graph_label"
+            android:textSize="18sp"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="10dp"
+            android:text="PRECIPITATION NEXT HOUR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.dryan.weather.widget.WeatherWidget.PrecipitationGraph
+            android:id="@+id/chart"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:orientation="horizontal" />
+
+    </LinearLayout>
+
+</RelativeLayout>
+</ScrollView>

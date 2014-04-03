@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/day"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:textSize="18sp"
+        android:layout_marginTop="12dp"
+        android:layout_centerInParent="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+    <TextView
+        android:id="@+id/date"
+        android:gravity="center_vertical"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:layout_below="@id/day"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+    <com.dryan.weather.widget.WeatherWidget.ExpandingTemperatureRange
+        android:id="@+id/expand"
+        android:layout_toRightOf="@id/day"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_below="@id/expand"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:paddingBottom="10dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/precip_label"
+            android:text="PRECIPITATION : "
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/precip"
+            android:text="-%"
+            android:layout_marginBottom="10dp"
+            android:layout_toRightOf="@id/precip_label"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/humid_label"
+            android:text="HUMIDITY : "
+            android:layout_toRightOf="@id/precip"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/humidity"
+            android:text="-%"
+            android:layout_marginBottom="10dp"
+            android:layout_toRightOf="@id/humid_label"
+            android:textSize="14sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+
+</RelativeLayout>

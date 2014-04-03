@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dryan.weather" >
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name="com.dryan.weather.WeatherApp"
+        android:allowBackup="true"
+        android:icon="@drawable/app_icon"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.dryan.weather.MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="com.vokal.database.SimpleContentProvider"
+            android:authorities="com.dryan.weather.db"
+            android:exported="false" >
+            <meta-data
+                android:name="database_name"
+                android:value="com.dryan.weather.db" />
+        </provider>
+
+        <activity
+            android:name="com.dryan.weather.TestActivity"
+            android:label="@string/title_activity_test" >
+        </activity>
+    </application>
+
+</manifest>
