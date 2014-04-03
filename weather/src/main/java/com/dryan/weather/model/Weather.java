@@ -41,6 +41,74 @@ public class Weather extends AbstractDataModel {
     private double temperatureMax;
     private double temperatureMin;
     private double precipProbability;
+    private double windSpeed;
+    private int id;
+    private double apparentTemperature;
+
+    public Weather() {
+
+    }
+
+    public Weather(Cursor aCursor) {
+        id = aCursor.getInt(aCursor.getColumnIndex("_id"));
+        summary = aCursor.getString(aCursor.getColumnIndex(SUMMARY));
+        icon = aCursor.getString(aCursor.getColumnIndex(ICON));
+        sunriseTime = aCursor.getInt(aCursor.getColumnIndex(SUNRISE));
+        precipIntensity = aCursor.getDouble(aCursor.getColumnIndex(PRECIPT_INTENS));
+        humidity = aCursor.getDouble(aCursor.getColumnIndex(HUMIDITY));
+        windSpeed = aCursor.getDouble(aCursor.getColumnIndex(WIND));
+        precipProbability = aCursor.getDouble(aCursor.getColumnIndex(PRECIP));
+        time = aCursor.getLong(aCursor.getColumnIndex(TIME));
+        precipType = aCursor.getString(aCursor.getColumnIndex(PRECIP_TYPE));
+        temperature = aCursor.getInt(aCursor.getColumnIndex(TEMP));
+        cloudCover = aCursor.getInt(aCursor.getColumnIndex(HUMIDITY));
+        temperatureMax = aCursor.getInt(aCursor.getColumnIndex(TEMP_MAX));
+        temperatureMin = aCursor.getInt(aCursor.getColumnIndex(TEMP_MIN));
+        apparentTemperature = aCursor.getInt(aCursor.getColumnIndex(APPARENT_TEMP));
+    }
+
+    @Override
+    protected SQLiteTable buildTableSchema(SQLiteTable.Builder aBuilder) {
+        aBuilder.addIntegerColumn("_id").primaryKey().autoincrement().unique()
+                .addStringColumn(SUMMARY)
+                .addStringColumn(ICON)
+                .addIntegerColumn(SUNRISE)
+                .addStringColumn(PRECIPT_INTENS)
+                .addStringColumn(PRECIP_TYPE)
+                .addIntegerColumn(TEMP)
+                .addIntegerColumn(PRECIP)
+                .addIntegerColumn(WIND)
+                .addIntegerColumn(CLOUD_COVER)
+                .addIntegerColumn(HUMIDITY)
+                .addIntegerColumn(APPARENT_TEMP)
+                .addRealColumn(TIME)
+                .addIntegerColumn(TEMP_MAX)
+                .addIntegerColumn(TEMP_MIN);
+        return aBuilder.build();
+    }
+
+    @Override
+    protected SQLiteTable updateTableSchema(SQLiteTable.Builder aBuilder, int aOldVersion) {
+        return null;
+    }
+
+    @Override
+    protected void populateContentValues(ContentValues aValues) {
+        aValues.put(SUMMARY, summary);
+        aValues.put(ICON, icon);
+        aValues.put(SUNRISE, sunriseTime);
+        aValues.put(PRECIPT_INTENS, precipIntensity);
+        aValues.put(PRECIP_TYPE, precipType);
+        aValues.put(CLOUD_COVER, (int) temperature);
+        aValues.put(CLOUD_COVER, cloudCover);
+        aValues.put(HUMIDITY, humidity);
+        aValues.put(APPARENT_TEMP, apparentTemperature);
+        aValues.put(WIND, windSpeed);
+        aValues.put(PRECIP, precipProbability);
+        aValues.put(TIME, time);
+        aValues.put(TEMP_MAX, temperatureMax);
+        aValues.put(TEMP_MIN, temperatureMin);
+    }
 
     public double getWindSpeed() {
         return windSpeed;
@@ -58,77 +126,6 @@ public class Weather extends AbstractDataModel {
         this.precipProbability = precipProbability;
     }
 
-    private double windSpeed;
-    private boolean isCurrent;
-    private int id;
-    private double apparentTemperature;
-
-    public Weather() {
-
-    }
-
-    public Weather(Cursor aCursor) {
-        id = aCursor.getInt(aCursor.getColumnIndex("_id"));
-        summary = aCursor.getString(aCursor.getColumnIndex(SUMMARY));
-        icon = aCursor.getString(aCursor.getColumnIndex(ICON));
-        sunriseTime = aCursor.getInt(aCursor.getColumnIndex(SUNRISE));
-        precipIntensity = aCursor.getDouble(aCursor.getColumnIndex(PRECIPT_INTENS));
-        humidity = aCursor.getDouble(aCursor.getColumnIndex("humidity"));
-        windSpeed = aCursor.getDouble(aCursor.getColumnIndex(WIND));
-        precipProbability = aCursor.getDouble(aCursor.getColumnIndex(PRECIP));
-        time = aCursor.getLong(aCursor.getColumnIndex(TIME));
-        precipType = aCursor.getString(aCursor.getColumnIndex(PRECIP_TYPE));
-        temperature = aCursor.getInt(aCursor.getColumnIndex(TEMP));
-        Timber.d("out db tmep " + temperature);
-        cloudCover = aCursor.getInt(aCursor.getColumnIndex(HUMIDITY));
-        temperatureMax = aCursor.getInt(aCursor.getColumnIndex(TEMP_MAX));
-        temperatureMin = aCursor.getInt(aCursor.getColumnIndex(TEMP_MIN));
-        apparentTemperature = aCursor.getInt(aCursor.getColumnIndex(APPARENT_TEMP));
-    }
-
-    @Override
-    protected SQLiteTable buildTableSchema(SQLiteTable.Builder aBuilder) {
-        aBuilder.addIntegerColumn("_id").primaryKey().autoincrement().unique()
-                .addStringColumn("summary")
-                .addStringColumn("icon")
-                .addIntegerColumn("sunrise_time")
-                .addStringColumn("precip_intensity")
-                .addStringColumn("precip_type")
-                .addIntegerColumn("temperature")
-                .addIntegerColumn(PRECIP)
-                .addIntegerColumn(WIND)
-                .addIntegerColumn("cloud_cover")
-                .addIntegerColumn("humidity")
-                .addIntegerColumn(APPARENT_TEMP)
-                .addRealColumn(TIME)
-                .addIntegerColumn("temperature_max")
-                .addIntegerColumn("temperature_min");
-        return aBuilder.build();
-    }
-
-    @Override
-    protected SQLiteTable updateTableSchema(SQLiteTable.Builder aBuilder, int aOldVersion) {
-        return null;
-    }
-
-    @Override
-    protected void populateContentValues(ContentValues aValues) {
-        aValues.put("summary", summary);
-        aValues.put("icon", icon);
-        aValues.put("sunrise_time", sunriseTime);
-        aValues.put("precip_intensity", precipIntensity);
-        aValues.put("precip_type", precipType);
-        Timber.d("into db tmep " + temperature);
-        aValues.put("temperature", (int) temperature);
-        aValues.put("cloud_cover", cloudCover);
-        aValues.put("humidity", humidity);
-        aValues.put(APPARENT_TEMP, apparentTemperature);
-        aValues.put(WIND, windSpeed);
-        aValues.put(PRECIP, precipProbability);
-        aValues.put(TIME, time);
-        aValues.put("temperature_max", temperatureMax);
-        aValues.put("temperature_min", temperatureMin);
-    }
 
     public long getTime() {
         return time;

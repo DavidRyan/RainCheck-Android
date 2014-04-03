@@ -42,7 +42,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/powered"
-            android:text="Powered by forcast.io"
+            android:text="@string/powered"
             android:textSize="10sp"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
@@ -80,7 +80,7 @@
 
         <TextView
             android:id="@+id/colon_one"
-            android:text=" : "
+            android:text="@string/colon"
             android:textSize="16sp"
             android:layout_below="@id/icon"
             android:layout_marginLeft="120dp"
@@ -98,7 +98,7 @@
 
         <TextView
             android:id="@+id/colon_two"
-            android:text=" : "
+            android:text="@string/colon"
             android:textSize="16sp"
             android:layout_below="@id/colon_one"
             android:layout_marginTop="10dp"
@@ -107,7 +107,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/colon_three"
-            android:text=" : "
+            android:text="@string/colon"
             android:textSize="16sp"
             android:layout_below="@id/colon_two"
             android:layout_marginTop="10dp"
@@ -117,7 +117,7 @@
 
         <TextView
             android:id="@+id/humidity"
-            android:text="HUMIDTY "
+            android:text="@string/main_humid_label"
             android:textSize="16sp"
             android:layout_alignBottom="@id/colon_two"
             android:layout_toLeftOf="@id/colon_two"
@@ -126,7 +126,7 @@
         <TextView
             android:id="@+id/precip"
             android:layout_alignBottom="@id/colon_one"
-            android:text="PRECIPITATION "
+            android:text="@string/main_precip_label"
             android:layout_toLeftOf="@id/colon_three"
             android:textSize="16sp"
             android:layout_width="wrap_content"
@@ -142,7 +142,7 @@
 
         <TextView
             android:id="@+id/wind"
-            android:text="WIND "
+            android:text="@string/main_wind_label"
             android:textSize="16sp"
             android:layout_alignBottom="@id/colon_three"
             android:layout_toLeftOf="@id/colon_three"
@@ -176,7 +176,7 @@
             android:textSize="18sp"
             android:layout_gravity="center_vertical"
             android:layout_margin="10dp"
-            android:text="PRECIPITATION NEXT HOUR"
+            android:text="@string/precip_next_hour"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 

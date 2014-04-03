@@ -49,7 +49,7 @@ public class DailyWeatherFragment extends Fragment implements LoaderManager.Load
         View v = inflater.inflate(R.layout.fragment_hour, container, false);
         ButterKnife.inject(this, v);
         getLoaderManager().initLoader(0, null, this);
-        getActivity().getActionBar().setTitle("48 HOUR FORCAST");
+        getActivity().getActionBar().setTitle(getActivity().getString(R.string.ab_48_title));
         return v;
     }
 

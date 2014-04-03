@@ -102,7 +102,7 @@ public class CurrentWeatherFragment extends Fragment  {
         mPrecipLabel.setTypeface(WeatherApp.getRoboto(getActivity()));
         mLocation.setTypeface(WeatherApp.getRoboto(getActivity()));
         mPowered.setTypeface(WeatherApp.getRoboto(getActivity()));
-        getActivity().getActionBar().setTitle("CURRENT FORCAST");
+        getActivity().getActionBar().setTitle(getActivity().getString(R.string.ab_current_title));
         return v;
     }
 
@@ -205,7 +205,6 @@ public class CurrentWeatherFragment extends Fragment  {
                     p = new TemperatureGraph.Point();
                     p.x = data.getPosition();
                     p.y = w.getTemperature();
-                    Timber.d("tempt + " + w.getTemperature() + " max " + w.getTemperatureMax());
                     points.add(p);
                 } while (data.moveToNext());
             }

@@ -12,5 +12,19 @@
     <string name="error">Could not retrieve all data...</string>
     <string name="title_activity_test">TestActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="precip_text">PRECIPITATION : </string>
+    <string name="humid_text">HUMIDITY : </string>
+    <string name="powered">Powered by forcast.io</string>
+    <string name="colon"> : </string>
+    <string name="main_humid_label">HUMIDTY </string>
+    <string name="main_precip_label">PRECIPITATION </string>
+    <string name="main_wind_label">WIND </string>
+    <string name="precip_next_hour">PRECIPITATION NEXT HOUR</string>
+    <string name="feels_like_hour">FEELS LIKE</string>
+    <string name="precip_hour">PRECIPITATION : </string>
+    <string name="humid_hour">HUMIDITY : </string>
+    <string name="ab_current_title">CURRENT FORCAST</string>
+    <string name="ab_48_title">48 HOUR FORCAST</string>
+    <string name="ab_weekly_title">WEEKLY FORECAST</string>
 
 </resources>

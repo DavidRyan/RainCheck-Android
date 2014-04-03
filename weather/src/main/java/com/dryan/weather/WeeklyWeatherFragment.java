@@ -41,7 +41,7 @@ public class WeeklyWeatherFragment extends Fragment implements LoaderManager.Loa
         View v = inflater.inflate(R.layout.fragment_daily, container, false);
         ButterKnife.inject(this, v);
         getLoaderManager().initLoader(0, null, this);
-        getActivity().getActionBar().setTitle("WEEKLY FORCAST");
+        getActivity().getActionBar().setTitle(getActivity().getString(R.string.ab_weekly_title));
         return v;
     }
 

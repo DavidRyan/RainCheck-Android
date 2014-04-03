@@ -255,7 +255,6 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Timber.d("error");
         startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
     }
 
