@@ -99,7 +99,7 @@ public class Weather extends AbstractDataModel {
         aValues.put(SUNRISE, sunriseTime);
         aValues.put(PRECIPT_INTENS, precipIntensity);
         aValues.put(PRECIP_TYPE, precipType);
-        aValues.put(CLOUD_COVER, (int) temperature);
+        aValues.put(TEMP, (int) temperature);
         aValues.put(CLOUD_COVER, cloudCover);
         aValues.put(HUMIDITY, humidity);
         aValues.put(APPARENT_TEMP, apparentTemperature);

@@ -26,6 +26,7 @@ import android.view.Window;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.dryan.weather.event.NetworkEvent;
 import com.dryan.weather.service.WeatherService;
 
@@ -64,6 +65,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.activity_main);
+        Crashlytics.start(this);
 
         WeatherApp.inject(this);
         mLocationClient = new LocationClient(this, this, this);
