@@ -36,6 +36,7 @@
             android:name="com.dryan.weather.TestActivity"
             android:label="@string/title_activity_test" >
         </activity>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="c9882fb3c1f622c24cba48798cfbb2b7f5975354"/>
     </application>
 
 </manifest>
