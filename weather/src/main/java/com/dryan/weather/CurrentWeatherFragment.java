@@ -87,6 +87,7 @@ public class CurrentWeatherFragment extends Fragment  {
     ImageView mIcon;
 
     WeatherCursorLoader mLoader = new WeatherCursorLoader();
+    private SkyconsDrawable mDrawable;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -111,7 +112,14 @@ public class CurrentWeatherFragment extends Fragment  {
         getLoaderManager().restartLoader(CURRENT_LOADER, null, mLoader);
         getLoaderManager().restartLoader(MINUTE_LOADER, null, mLoader);
       //  getLoaderManager().restartLoader(HOUR_LOADER, null, mLoader);
+        if (mDrawable != null) mDrawable.start();
         super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mDrawable != null) mDrawable.stop();
     }
 
     private class WeatherCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -186,10 +194,10 @@ public class CurrentWeatherFragment extends Fragment  {
             }
             mLocation.setText(((WeatherApp) getActivity().getApplication()).getLocation("current_loc"));
 
-            SkyconsDrawable drawable = (SkyconsDrawable) IconUtil.getDrawable(weather.getIcon());
-            if (drawable != null) {
-                mIcon.setImageDrawable(drawable);
-                drawable.stop();
+            mDrawable = (SkyconsDrawable) IconUtil.getDrawable(weather.getIcon());
+            if (mDrawable != null) {
+                mIcon.setImageDrawable(mDrawable);
+                mDrawable.start();
             } else {
                 mIcon.setImageDrawable(getResources().getDrawable(R.drawable.wind));
             }

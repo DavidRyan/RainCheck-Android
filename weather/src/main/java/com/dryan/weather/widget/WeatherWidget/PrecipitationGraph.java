@@ -16,6 +16,8 @@ import com.dryan.weather.WeatherApp;
 import java.util.ArrayList;
 import java.util.Random;
 
+import timber.log.Timber;
+
 /**
  * Created by Cold-One-City-USA on 3/3/14.
  */
@@ -146,21 +148,25 @@ public class PrecipitationGraph extends View {
     }
 
 
-    //TODO: Need to make this more accurate
     private float convertYtoPixel(double y) {
-        int result = (int) ((BASE_BAR-10) - ((y*1000)));
-        if (result < 0) result = 10;
-        if (result == 190) result = 200;
+     //   if (y == 0) return BASE_BAR;
+        int result = (int) ((BASE_BAR) - ((y*10000) * 0.0666));
+        Timber.d("result " + result);
+        if (result > 200) result = 200;
+        if (result < 1) result = 5;
         return result;
     }
 
     public int getRandomY(double y) {
+      //  if (y == 0) return 0;
         if (y == 200) return 199;
         double start = 1;
         double end = 7;
         double random = new Random().nextDouble();
         double result = start + (random * (end - start));
-        return (int) (y + result);
+        int newValue = (int) (y + result);
+        if (newValue > BASE_BAR) return BASE_BAR;
+        return newValue;
     }
 
     public static class Point {
