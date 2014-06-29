@@ -11,10 +11,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.MatrixCursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -25,12 +27,15 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.SearchView;
+import android.widget.SeekBar;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.dryan.weather.event.NetworkEvent;
 import com.dryan.weather.service.WeatherService;
 
+import com.dryan.weather.widget.WeatherWidget.GeoSearchView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
@@ -44,7 +49,7 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
-public class MainActivity extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+public class MainActivity extends Activity implements GeoSearchView.SearchCallback, NavigationDrawerFragment.NavigationDrawerCallbacks, GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 
     public static final String PREF_CURRENT_LOCATION = "current_loc";
 
@@ -54,12 +59,13 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     private CurrentWeatherFragment mCurrent = new CurrentWeatherFragment();
     private WeeklyWeatherFragment mWeekly = new WeeklyWeatherFragment();
     private DailyWeatherFragment mDaily = new DailyWeatherFragment();
+    private List<Address> mList;
     private Location mLocation;
 
     @Inject
     WeatherService mWeatherService;
 
-    SearchView searchView;
+    GeoSearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,27 +212,27 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         final MenuItem search = menu.findItem(R.id.search);
-        // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
+        mSearchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        mSearchView.setOnQueryTextListener(listener);
+        mSearchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
-                search(query);
-                search.collapseActionView();
-                searchView.onActionViewCollapsed();
-                return true;
+            public boolean onSuggestionSelect(int position) {
+                search(mList.get(position).getAddressLine(0));
+                mSearchView.setQuery(mList.get(position).getAddressLine(0), false);
+                return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String text) {
-                return true;
+            public boolean onSuggestionClick(int position) {
+                search(mList.get(position).getAddressLine(0));
+                mSearchView.setQuery(mList.get(position).getAddressLine(0), false);
+                return false;
             }
         });
         // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false);
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setIconifiedByDefault(false);
         return true;
     }
 
@@ -261,19 +267,71 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
     }
 
-    public void setAlarm() {
-        BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override public void onReceive( Context context, Intent intent ) {
-                mWeatherService.fetchWeatherWeather(mLocation.getLatitude(), mLocation.getLongitude());
-            }
-        };
-
-      //  this.registerReceiver( receiver, new IntentFilter("com.dryan.weather.update") );
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast( this, 0, new Intent("com.dryan.weather.update"), 0 );
-        AlarmManager manager = (AlarmManager)(this.getSystemService( Context.ALARM_SERVICE ));
-       // manager.setRepeating( AlarmManager.ELAPSED_REALTIME , SystemClock.elapsedRealtime() + 1000*60*1, 1000*60*60*4, pendingIntent);
+    @Override
+    public void onSearch(String aString) {
+        search(aString);
     }
 
+    private SearchView mSearchView;
+
+    SearchView.OnQueryTextListener listener = new SearchView.OnQueryTextListener() {
+
+        AsyncTask<String, Void, List<Address>> mTask;
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return true;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String text) {
+            final Geocoder geoCoder = new Geocoder(MainActivity.this, Locale.getDefault());
+            if (mTask != null) {
+                mTask.cancel(true);
+            }
+            mTask = new AsyncTask<String, Void, List<Address>>() {
+
+                @Override
+                protected List<Address> doInBackground(String... params) {
+                    try {
+                        mList = geoCoder.getFromLocationName(params[0], 6);
+                        return mList;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(List<Address> list) {
+                    super.onPostExecute(list);
+                    String[] columnNames = {"_id","text"};
+                    MatrixCursor cursor = new MatrixCursor(columnNames);
+                    String[] array = new String[list.size()];
+                    for(int i = 0; i < list.size(); i++) {
+                        try {
+                            array[i] = list.get(i).getAddressLine(0).toString() + ", " + list.get(i).getAddressLine(1).toString();
+                        } catch (Exception e) {
+                            return;
+                        }
+
+                    }
+                    String[] temp = new String[2];
+                    int id = 0;
+                    for(String item : array) {
+                        temp[0] = Integer.toString(id++);
+                        temp[1] = item;
+                        cursor.addRow(temp);
+                    }
+                    String[] from = {"text"};
+                    int[] to = {R.id.dropDown};
+                    SimpleCursorAdapter adapter = new SimpleCursorAdapter(MainActivity.this, R.layout.map_search_dropdown, cursor, from, to, 0);
+                    mSearchView.setSuggestionsAdapter(adapter);
+                }
+            };
+            mTask.execute(text);
+            return true;
+        }
+    };
 }
 

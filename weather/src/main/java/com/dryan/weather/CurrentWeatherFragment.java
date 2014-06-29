@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.dryan.weather.model.CurrentWeather;
 import com.dryan.weather.model.MinuteWeather;
 import com.dryan.weather.model.Weather;
+import com.dryan.weather.widget.WeatherWidget.GeoSearchView;
 import com.dryan.weather.widget.WeatherWidget.IconUtil;
 import com.dryan.weather.widget.WeatherWidget.PrecipitationGraph.Point;
 import com.dryan.weather.widget.WeatherWidget.PrecipitationGraph;
@@ -104,6 +105,9 @@ public class CurrentWeatherFragment extends Fragment  {
         mLocation.setTypeface(WeatherApp.getRoboto(getActivity()));
         mPowered.setTypeface(WeatherApp.getRoboto(getActivity()));
         getActivity().getActionBar().setTitle(getActivity().getString(R.string.ab_current_title));
+
+
+
         return v;
     }
 
