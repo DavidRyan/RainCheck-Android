@@ -62,10 +62,10 @@ public class GeoSearchView extends SearchView {
                     temp[1] = item;
                     cursor.addRow(temp);
                 }
-                String[] from = {"text"};
-                int[] to = {R.id.dropDown};
-                SimpleCursorAdapter adapter = new SimpleCursorAdapter(getContext(), R.layout.map_search_dropdown, cursor, from, to, 0);
-                GeoSearchView.this.setSuggestionsAdapter(adapter);
+           //     String[] from = {"text"};
+        //        int[] to = {R.id.dropDown};
+         //       SimpleCursorAdapter adapter = new SimpleCursorAdapter(getContext(), R.layout.map_search_dropdown, cursor, from, to, 0);
+          //      GeoSearchView.this.setSuggestionsAdapter(adapter);
             } catch (IOException e) {
                 e.printStackTrace();
             }

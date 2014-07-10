@@ -197,7 +197,7 @@ public class CurrentWeatherFragment extends Fragment  {
             mDrawable = (SkyconsDrawable) IconUtil.getDrawable(weather.getIcon());
             if (mDrawable != null) {
                 mIcon.setImageDrawable(mDrawable);
-                mDrawable.start();
+                //mDrawable.start();
             } else {
                 mIcon.setImageDrawable(getResources().getDrawable(R.drawable.wind));
             }
