@@ -11,6 +11,7 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import com.dryan.weather.model.HourlyWeather;
 import com.dryan.weather.model.Weather;
+import com.dryan.weather.service.ForcastService;
 import com.dryan.weather.widget.WeatherWidget.ExpandingTemperatureBar;
 import com.dryan.weather.widget.WeatherWidget.IconUtil;
 import com.dryan.weather.widget.WeatherWidget.SkyconsDrawable;
@@ -25,15 +27,26 @@ import com.vokal.database.DatabaseHelper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.Observable;
+import rx.Observer;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.observables.AndroidObservable;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Cold-One-City-USA on 2/26/14.
  */
-public class DailyWeatherFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DailyWeatherFragment extends Fragment {
 
 
     @InjectView(R.id.hour_list)
@@ -41,73 +54,67 @@ public class DailyWeatherFragment extends Fragment implements LoaderManager.Load
 
     HourAdapter mAdapter;
 
+
     Weather mMaxTemp;
     Weather mMaxFeelTemp;
+    private Subscription sub;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_hour, container, false);
         ButterKnife.inject(this, v);
-        getLoaderManager().initLoader(0, null, this);
         getActivity().getActionBar().setTitle(getActivity().getString(R.string.ab_48_title));
         return v;
     }
 
+    ArrayList<Weather> mWeatherDays = new ArrayList<Weather>();
     @Override
     public void onResume() {
-        getLoaderManager().restartLoader(0,null,this);
+        sub = AndroidObservable.bindFragment(this, 
+                ForcastService.fetchWeatherObservable("", "daily")).
+                    subscribeOn(Schedulers.newThread()).
+                    subscribe(
+                            weather -> {
+                                if (mMaxTemp == null) mMaxTemp = weather;
+                                if (weather.getTemperatureMax() > mMaxTemp.getTemperatureMax()) mMaxTemp = weather;
+                                if (mMaxFeelTemp == null) mMaxFeelTemp = weather;
+                                if (weather.getApparentTemperature() > mMaxTemp.getApparentTemperature()) mMaxFeelTemp = weather;
+                                mWeatherDays.add(weather);
+                            },
+                            error -> error.printStackTrace(),
+                            () -> {
+                                mAdapter = new HourAdapter(getActivity(), mWeatherDays);
+                                mListView.setAdapter(mAdapter);
+                            }
+                    );
         super.onResume();
     }
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), DatabaseHelper.getContentUri(HourlyWeather.class),
-                null, null, null, null);
-    }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (!data.moveToFirst()) return;
-
-        Cursor c;
-        c = getActivity().getContentResolver().query(DatabaseHelper.getContentUri(HourlyWeather.class),null,null,null,HourlyWeather.TEMP_MAX + " DESC");
-        if (!c.moveToFirst()) return;
-        mMaxTemp = new Weather(c);
-
-        c = getActivity().getContentResolver().query(DatabaseHelper.getContentUri(HourlyWeather.class),null,null,null,HourlyWeather.APPARENT_TEMP+ " DESC");
-        c.moveToFirst();
-        mMaxFeelTemp = new Weather(c);
-
-        mAdapter = new HourAdapter(getActivity(), data, false);
-        mListView.setAdapter(mAdapter);
+    public void onPause() {
+        super.onPause();
+        sub.unsubscribe();
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    private class HourAdapter extends ArrayAdapter<Weather> {
 
-    }
-
-    private class HourAdapter extends CursorAdapter {
-
-        LayoutInflater mInflater;
         Context mContext;
         Date mDate = new Date();
+        ArrayList<Weather> data;
 
-        public HourAdapter(Context context, Cursor c, boolean autoRequery) {
-            super(context, c, autoRequery);
-            mInflater = LayoutInflater.from(context);
+        public HourAdapter(Context context, ArrayList<Weather> values) {
+            super(context, R.layout.hour_item, values);
             mContext = context;
             mDate = new Date();
+            data = values;
         }
 
 
         @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            return mInflater.inflate(R.layout.hour_item,parent, false);
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            Weather w = new Weather(cursor);
+        public View getView(int position, View view, ViewGroup parent) {
+            LayoutInflater inflater = (getActivity()).getLayoutInflater();
+            view = inflater.inflate(R.layout.hour_item, parent, false);
+            Weather w = data.get(position);
             TextView time = (TextView) view.findViewById(R.id.time);
             TextView date = (TextView) view.findViewById(R.id.date);
             TextView feels = (TextView) view.findViewById(R.id.feels_label);
@@ -170,7 +177,12 @@ public class DailyWeatherFragment extends Fragment implements LoaderManager.Load
             feel_range.setMaxTemp(high);
             feel_range.setHigh((int) w.getApparentTemperature());
             feel_range.begin();
+
+
+
+            return view;
         }
+
 
     }
 }

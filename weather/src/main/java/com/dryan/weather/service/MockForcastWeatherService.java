@@ -33,10 +33,11 @@ public class MockForcastWeatherService extends ForcastService {
             JSONObject jsonResponse = null;
             jsonResponse = new JSONObject(json);
             Timber.d("rep " + jsonResponse.optJSONObject("minutely"), new JSONObject());
-            saveCurrent(jsonResponse.optJSONObject("currently"));
-            saveHourly(jsonResponse.optJSONObject("hourly"));
-            saveDaily(jsonResponse.optJSONObject("daily"));
-            saveMinutely(jsonResponse.optJSONObject("minutely"));
+            //saveCurrent(jsonResponse.optJSONObject("currently"));
+            //saveHourly(jsonResponse.optJSONObject("hourly"));
+            //saveDaily(jsonResponse.optJSONObject("daily"));
+
+            //saveMinutely(jsonResponse.optJSONObject("minutely"));
             WeatherApp.BUS.post(new NetworkEvent(true));
         } catch (JSONException e) {
             e.printStackTrace();

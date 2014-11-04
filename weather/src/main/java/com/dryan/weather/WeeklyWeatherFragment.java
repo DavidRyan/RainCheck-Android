@@ -1,5 +1,6 @@
 package com.dryan.weather;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -10,27 +11,42 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.dryan.weather.model.Weather;
 import com.dryan.weather.model.WeeklyWeather;
+import com.dryan.weather.service.ForcastService;
 import com.dryan.weather.widget.WeatherWidget.ExpandingTemperatureRange;
 import com.vokal.database.DatabaseHelper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscription;
+import rx.android.observables.AndroidObservable;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 /**
  * Created by Cold-One-City-USA on 2/26/14.
  */
-public class WeeklyWeatherFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class WeeklyWeatherFragment extends Fragment {
 
     WeekAdapter mWeekAdapter;
+    Subscription subscription;
 
     @InjectView(R.id.day_list)
     ListView mListView;
@@ -40,69 +56,77 @@ public class WeeklyWeatherFragment extends Fragment implements LoaderManager.Loa
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_daily, container, false);
         ButterKnife.inject(this, v);
-        getLoaderManager().initLoader(0, null, this);
         getActivity().getActionBar().setTitle(getActivity().getString(R.string.ab_weekly_title));
         return v;
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        subscription.unsubscribe();
+    }
+
+    ArrayList<Weather> mWeekWeatherList = new ArrayList<Weather>();
+    @Override
     public void onResume() {
-        getLoaderManager().restartLoader(0,null,this);
         super.onResume();
+        subscription = AndroidObservable.bindFragment(this, ForcastService.fetchWeatherObservable("", "daily"))
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(
+                    (Weather weather) -> mWeekWeatherList.add(weather),
+                    (Throwable e) -> e.printStackTrace(),
+                    () -> {
+                        ArrayList<Weather> sorted = new ArrayList<Weather>(mWeekWeatherList);
+                        Collections.sort(sorted, (Weather lhs, Weather rhs) -> {
+                                if (lhs.getTemperatureMax() > rhs.getTemperatureMax()) {
+                                    return -1;
+                                } else if (lhs.getTemperatureMax() < rhs.getTemperatureMax()) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            }
+                        );
+                        double max = sorted.get(0).getTemperatureMax();
+                        Collections.sort(sorted, (Weather lhs, Weather rhs) -> {
+                                if (lhs.getTemperatureMin() > rhs.getTemperatureMin()) {
+                                    return 1;
+                                } else if (lhs.getTemperatureMin() < rhs.getTemperatureMin()) {
+                                    return -1;
+                                } else {
+                                    return 0;
+                                }
+                            }
+                        );
+                        double min = sorted.get(0).getTemperatureMin();
+                        Timber.d("max= " + max + " min=" + min);
+                        mWeekAdapter = new WeekAdapter(getActivity(), mWeekWeatherList, (int) min, (int) max);
+                        mListView.setAdapter(mWeekAdapter);
+                    }
+                );
     }
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), DatabaseHelper.getContentUri(WeeklyWeather.class),
-                null, null, null, null);
-    }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (!data.moveToFirst()) return;
-        Timber.d("count " + data.getCount());
-
-        Cursor c;
-        c = getActivity().getContentResolver().query(DatabaseHelper.getContentUri(WeeklyWeather.class),null,null,null, WeeklyWeather.TEMP_MAX + " DESC");
-        if (!c.moveToFirst()) return;
-        WeeklyWeather max = new WeeklyWeather(c);
-        c = getActivity().getContentResolver().query(DatabaseHelper.getContentUri(WeeklyWeather.class),null,null,null, WeeklyWeather.TEMP_MIN + " ASC");
-        c.moveToFirst();
-        WeeklyWeather min = new WeeklyWeather(c);
-
-        mWeekAdapter = new WeekAdapter(getActivity(), data, false, (int)min.getTemperatureMin(), (int)max.getTemperatureMax());
-        mListView.setAdapter(mWeekAdapter);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
-
-    private class WeekAdapter extends CursorAdapter {
+    private class WeekAdapter extends ArrayAdapter<Weather> {
 
         LayoutInflater mInflater;
+        ArrayList<Weather> data;
         Context mContext;
         int mMin;
         int mMax;
         Date mDate = new Date();
 
-        public WeekAdapter(Context context, Cursor c, boolean autoRequery, int aMin, int aMax) {
-            super(context, c, autoRequery);
-            mInflater = LayoutInflater.from(context);
-            mMin = aMin;
-            mMax = aMax;
+        public WeekAdapter(Context context, ArrayList<Weather> values, int min, int max) {
+            super(context, R.layout.day_item, values);
             mContext = context;
-        }
-
-
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            return mInflater.inflate(R.layout.day_item,parent, false);
+            data = values;
+            mMax = max;
+            mMin = min;
         }
 
         @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-
+        public View getView(int position, View view, ViewGroup parent) {
+            LayoutInflater inflater = ((Activity)getActivity()).getLayoutInflater();
+            view= inflater.inflate(R.layout.day_item, parent, false);
             ExpandingTemperatureRange range = (ExpandingTemperatureRange) view.findViewById(R.id.expand);
             TextView day = (TextView) view.findViewById(R.id.day);
             TextView date = (TextView) view.findViewById(R.id.date);
@@ -118,7 +142,7 @@ public class WeeklyWeatherFragment extends Fragment implements LoaderManager.Loa
             precip.setTypeface(WeatherApp.getRobotoBold(getActivity()));
             humid.setTypeface(WeatherApp.getRobotoBold(getActivity()));
 
-            WeeklyWeather weather = new WeeklyWeather(cursor);
+            Weather weather =  data.get(position);
             mDate = new Date(weather.getTime()*1000);
             if (!weather.getPrecipType().equals("")) {
                 precipLabel.setText(weather.getPrecipType().toUpperCase() + " : ");
@@ -133,7 +157,7 @@ public class WeeklyWeatherFragment extends Fragment implements LoaderManager.Loa
             range.setMinTemp(mMin);
             range.setMaxTemp(mMax);
             range.setHighAndLow((int) weather.getTemperatureMax(), (int) weather.getTemperatureMin());
+            return view;
         }
-
     }
 }

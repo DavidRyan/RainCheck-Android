@@ -2,134 +2,102 @@ package com.dryan.weather.service;
 
 import android.content.Context;
 
-import com.android.volley.*;
-import com.android.volley.toolbox.*;
-import com.dryan.weather.WeatherApp;
-import com.dryan.weather.event.NetworkEvent;
 import com.dryan.weather.model.CurrentWeather;
 import com.dryan.weather.model.WeeklyWeather;
 import com.dryan.weather.model.HourlyWeather;
 import com.dryan.weather.model.MinuteWeather;
 import com.dryan.weather.model.Weather;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.subscriptions.Subscriptions;
 import timber.log.Timber;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class ForcastService implements WeatherService {
 
-    private RequestQueue mRequestQueue;
     private Context mContext;
     private static final String BASE_URL = "https://api.forecast.io/forecast/4ebd27f07f344acc582656e2f54f370e/%f,%f";
+    private static String json;
 
     public ForcastService(Context aContext) {
         mContext = aContext;
-        mRequestQueue = Volley.newRequestQueue(mContext);
-    }
-
-    public class ForcastRequest extends JsonObjectRequest {
-
-        public ForcastRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-            super(method, url, jsonRequest, listener, errorListener);
-        }
-
-        @Override
-        protected Response<org.json.JSONObject> parseNetworkResponse(NetworkResponse response) {
-
-            try {
-                String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-                JSONObject jsonResponse = new JSONObject(json);
-                Timber.d("rep " + jsonResponse.optJSONObject("minutely"), new JSONObject());
-                saveCurrent(jsonResponse.optJSONObject("currently"));
-                saveHourly(jsonResponse.optJSONObject("hourly"));
-                saveDaily(jsonResponse.optJSONObject("daily"));
-                saveMinutely(jsonResponse.optJSONObject("minutely"));
-                return Response.success(jsonResponse, HttpHeaderParser.parseCacheHeaders(response));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                return Response.error(new ParseError(e));
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return Response.error(new ParseError(e));
-            }
-        }
     }
 
     @Override
     public void fetchWeatherWeather(double aLat, double aLong) {
-        String url = String.format(BASE_URL, aLat, aLong );
-        Timber.d("URL: " + url);
-        ForcastRequest request = new ForcastRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(final JSONObject response) {
-                        WeatherApp.BUS.post(new NetworkEvent(true));
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                WeatherApp.BUS.post(new NetworkEvent(false));
-                Timber.d(error.toString());
-            }
-        }
-        );
-        mRequestQueue.add(request);
-    }
 
-    public void saveDaily(JSONObject aDaily) {
-        WeeklyWeather weeklyWeather = new WeeklyWeather();
-        weeklyWeather.delete(mContext);
-        JSONArray array = aDaily.optJSONArray("data");
-        Timber.d("day " + array.optJSONObject(0).toString());
-        for (int i = 0; i < array.length()-1; i++) {
-            JSONObject object = array.optJSONObject(i);
-            weeklyWeather = new WeeklyWeather();
-            parse(object, weeklyWeather);
-            weeklyWeather.save(mContext);
-        }
-    }
-
-    public void saveHourly(JSONObject aHourly) {
-        HourlyWeather hourly = new HourlyWeather();
-        hourly.delete(mContext);
-        JSONArray array = aHourly.optJSONArray("data");
-        Timber.d("hour " + array.optJSONObject(0).toString());
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject object = array.optJSONObject(i);
-            hourly = new HourlyWeather();
-            parse(object, hourly);
-            hourly.save(mContext);
-        }
-    }
-
-    public void saveMinutely(JSONObject aMinutely) {
-        MinuteWeather mintuely = new MinuteWeather();
-        mintuely.delete(mContext);
-        JSONArray array = aMinutely.optJSONArray("data");
-        for (int i = 0; i < array.length(); i++) {
-
-            JSONObject object = array.optJSONObject(i);
-            mintuely = new MinuteWeather();
-            parse(object, mintuely);
-            mintuely.save(mContext);
-        }
-    }
-
-    public void saveCurrent(JSONObject aCurrent) {
-        Timber.d("current " + aCurrent);
-        CurrentWeather weather = new CurrentWeather();
-        weather.delete(mContext);
-        parse(aCurrent, weather);
-        weather.setId(0);
-        weather.save(mContext);
     }
 
     @Override
     public void parse(JSONObject aResponse, Weather aWeather) {
+
+    }
+
+    public static Observable<Weather> fetchWeatherObservable(final String aUrl, final String aType) {
+        final OkHttpClient client = new OkHttpClient();
+        return Observable.create((Observable.OnSubscribe<JSONObject>) subscriber -> {
+            try {
+                if (json == null) {
+                    final String url = "https://api.forecast.io/forecast/4ebd27f07f344acc582656e2f54f370e/35.2229,-80.8380"; //String.format(BASE_URL, 35.2229,-80.8380);
+                    Timber.d("https://api.forecast.io/forecast/4ebd27f07f344acc582656e2f54f370e/35.2229,-80.8380");
+                    Request request = new Request.Builder()
+                    .url("https://api.forecast.io/forecast/4ebd27f07f344acc582656e2f54f370e/35.2229,-80.8380")
+                    .build();
+
+                    Call call = client.newCall(request);
+                    Response response = null;
+                    try {
+                        response = call.execute();
+                        if (response.isSuccessful()) {
+                            json = response.body().string();
+                            Timber.d("RESPONSE: " +  json);
+                        }
+                    } catch (IOException e) {
+                        Timber.e("error",e);
+                        subscriber.onError(e);
+                    }
+                }
+
+                // Because forcast's api is stupid.
+                JSONArray data;
+                if (!aType.equals("currently")) {
+                    data = new JSONObject(json).getJSONObject(aType).getJSONArray("data");
+                    for (int i = 0; i < data.length(); i++) {
+                        subscriber.onNext(data.getJSONObject(i));
+                    }
+                } else {
+                    subscriber.onNext(new JSONObject(json).getJSONObject(aType));
+                }
+                subscriber.onCompleted();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                subscriber.onError(e);
+            }
+        }).map(json -> {
+            Weather weather = new Weather();
+            parseWeather(json, weather);
+            return weather;
+        });
+    }
+
+
+    public static void parseWeather(JSONObject aResponse, Weather aWeather) {
         try {
             aWeather.setSummary(aResponse.optString("summary","-"));
             aWeather.setIcon(aResponse.optString("icon", ""));
@@ -151,4 +119,5 @@ public class ForcastService implements WeatherService {
         }
 
     }
+
 }

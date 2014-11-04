@@ -68,6 +68,11 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
         setContentView(R.layout.activity_main);
         Crashlytics.start(this);
 
+        int x = 42;
+        runOnUiThread(() -> {
+            Timber.d("MainActivity", "Hello from lambda! x = " + x);
+        });
+
         WeatherApp.inject(this);
         mLocationClient = new LocationClient(this, this, this);
 
@@ -135,7 +140,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
             }
         });
         // mWeatherService.fetchWeatherWeather(35.2229,-80.8380);
-        mWeatherService.fetchWeatherWeather(aLat, aLong);
+        //mWeatherService.fetchWeatherWeather(aLat, aLong);
     }
 
     private void search(String aName) {
@@ -264,7 +269,7 @@ public class MainActivity extends Activity implements NavigationDrawerFragment.N
     public void setAlarm() {
         BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override public void onReceive( Context context, Intent intent ) {
-                mWeatherService.fetchWeatherWeather(mLocation.getLatitude(), mLocation.getLongitude());
+                //mWeatherService.fetchWeatherWeather(mLocation.getLatitude(), mLocation.getLongitude());
             }
         };
 
